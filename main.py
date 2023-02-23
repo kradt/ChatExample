@@ -1,7 +1,10 @@
 import socket
 from select import select
 from app import connection_users, to_read, to_write, tasks, with_json
+from colorama import Fore, Back
 
+
+#TODO: Fix error after one disconnect user!
 
 def server():
 	"""Создание серверного сокета и прием подключений
@@ -40,7 +43,7 @@ def registration_user_socket(client_socket):
 
 	# Добавляем в список подключенных пользователей нового
 	connection_users[client_socket] = name_user
-	print("Connection from user:", name_user)
+	print(f"{Fore.GREEN}Connection from user:", name_user)
 	tasks.append(send_history_to_user(client_socket))
 
 
@@ -80,7 +83,7 @@ def client(client_socket):
 				else:
 					# Возвращаем признак блокирующей функции и сокет
 					yield ("write", client_socket)
-					sock.send(f"{connection_users[client_socket]}:\n  {request}".encode())
+					sock.send(f"{Fore.YELLOW}{connection_users[client_socket]}:\n  {Fore.GREEN}{request}\n{Fore.CYAN}You:\n  {Fore.GREEN}".encode())
 		else:
 			client_socket.close()
 

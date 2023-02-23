@@ -1,4 +1,5 @@
 import json
+from colorama import Fore
 
 
 class withJson():
@@ -41,7 +42,7 @@ class withJson():
 		for i in messages:
 			one_message = messages[i]
 			for i in one_message:
-				text_message += f"{i}:\n {one_message.get(i)}\n"
+				text_message += f"{Fore.YELLOW}{i}:\n {Fore.CYAN}{one_message.get(i)}\n"
 		return text_message
 
 	def write_messages_to_json(self, user, message):
