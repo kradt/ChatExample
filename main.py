@@ -98,11 +98,11 @@ def event_loop():
 	""" Функция управляющая генераторами
 
 	Функция использует метод select
-
 	"""
 	while any([tasks, to_read, to_write]):
 		
 		while not tasks:
+			#print(select(to_read, to_write, []))
 			# Возвращает списки с объектами имеющие файловый дескриптор,
 			# Доступные для чтения либо для записи
 			ready_to_read, ready_to_write, _ = select(to_read, to_write, [])
@@ -129,6 +129,6 @@ def event_loop():
 
 
 if __name__ == "__main__":
-	# Создаем новою задачу для обработчика событий добавляя объект генератора в список task
+	# Create a new task for the evenv loop by adding an object generator to the task list
 	tasks.append(server())
 	event_loop()
