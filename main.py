@@ -55,7 +55,7 @@ def disconnect_user_socket(client_socket):
 def send_history_to_user(client_socket):
 	# Возвращаем признак блокирующей функции и сокет
 	yield ("write", client_socket)
-	response = with_json.get_history_chat().encode()
+	response = f"{with_json.get_history_chat()}\n{Fore.CYAN}You:\n  {Fore.GREEN}".encode()
 	client_socket.send(response)
 
 	# Создаем новою задачу для обработчика событий добавляя объект генератора в список task
@@ -88,7 +88,7 @@ def client(client_socket):
 				else:
 					# Возвращаем признак блокирующей функции и сокет
 					yield ("write", client_socket)
-					sock.send(f"{Fore.YELLOW}{connection_users[client_socket]}:\n  {Fore.GREEN}{request}\n{Fore.CYAN}You:\n  {Fore.GREEN}".encode())
+					sock.send(f"{Fore.YELLOW}{connection_users[client_socket]}:\n  {Fore.GREEN}{request}{Fore.CYAN}You:\n  {Fore.GREEN}".encode())
 		else:
 			disconnect_user_socket(client_socket)
 			client_socket.close()
@@ -102,7 +102,6 @@ def event_loop():
 	while any([tasks, to_read, to_write]):
 		
 		while not tasks:
-			#print(select(to_read, to_write, []))
 			# Возвращает списки с объектами имеющие файловый дескриптор,
 			# Доступные для чтения либо для записи
 			ready_to_read, ready_to_write, _ = select(to_read, to_write, [])

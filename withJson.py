@@ -21,7 +21,11 @@ class withJson():
 
 		"""
 		with open(self.file, "r") as file:
-			data = json.load(file)
+			opened_file = file.read()
+			if opened_file == "":
+				data = {}
+			else:
+				data = json.loads(opened_file)
 			return data
 
 	def message_dump(self, messages):
@@ -42,7 +46,7 @@ class withJson():
 		for i in messages:
 			one_message = messages[i]
 			for i in one_message:
-				text_message += f"{Fore.YELLOW}{i}:\n {Fore.CYAN}{one_message.get(i)}\n"
+				text_message += f"{Fore.YELLOW}{i}:\n {Fore.CYAN}{one_message.get(i)}"
 		return text_message
 
 	def write_messages_to_json(self, user, message):
