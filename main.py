@@ -5,41 +5,41 @@ from colorama import Fore, Back
 
 
 def server():
-	"""Создание серверного сокета и прием подключений
+	"""Create server socket and connection reception
 
-	Используется встроенный клас socket
+	Using libriary socket
 
 	"""
 	server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	# Позволяем серверному сокету переиспользовать подключния по тому же самому адресу.
+	# Allow the server socket to reuse connections on the same address.
 	server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 	server_socket.bind(("localhost", 5000))
 	server_socket.listen()
 
 	while True:
-		# Возвращаем признак блокирующей функции и сокет
+		# Return the sign of the blocking function and the socket
 		yield ("read", server_socket)
 		client_socket, addr = server_socket.accept()
-		# Создаем новою задачу для обработчика событий добавляя объект генератора в список task
+		# Create a new task for the event handler by adding a generator object to the task list
 		tasks.append(registration_user_socket(client_socket))
 
 
 def registration_user_socket(client_socket):
-	""" Регистация подключения по введеному имени пользователя
+	""" Connection registration by entered username
 
-	Используется встроенный клас socket
+	Using libriary socket
 
 	"""
 
-	# Возвращаем признак блокирующей функции и сокет
+	# Return the sign of the blocking function and the socket
 	yield ("write", client_socket)
 	client_socket.send("Enter your name: ".encode())
 
-	# Возвращаем признак блокирующей функции и сокет
+	# Return the sign of the blocking function and the socket
 	yield ("read", client_socket)
 	name_user = client_socket.recv(1024).decode()[:-1]
 
-	# Добавляем в список подключенных пользователей нового
+	# Add a new user to the list of connected users
 	connection_users[client_socket] = name_user
 	print(f"{Fore.GREEN}Connection from user:", name_user)
 	tasks.append(send_history_to_user(client_socket))
@@ -51,42 +51,41 @@ def disconnect_user_socket(client_socket):
 	to_read.pop(client_socket)
 	
 
-
 def send_history_to_user(client_socket):
-	# Возвращаем признак блокирующей функции и сокет
+	# Return the sign of the blocking function and the socket
 	yield ("write", client_socket)
 	response = f"{with_json.get_history_chat()}\n{Fore.CYAN}You:\n  {Fore.GREEN}".encode()
 	client_socket.send(response)
 
-	# Создаем новою задачу для обработчика событий добавляя объект генератора в список task
+	# Create a new task for the event handler by adding a generator object to the task list
 	tasks.append(client(client_socket))
 
 
 def client(client_socket):
-	"""Генератор получающий сообщения от подключенного пользователя
-	   и рассылающий его по всем подключенным сокетам
+	"""A generator that receives a message from a connected user
+	   and sends it to all connected sockets
 	
-	Генератор использует клас withJson. Oбъект класса создан в файле app.py
-	Используется встроенный клас socket
+	Using class withJson. The class object is created in the app.py file
+	Using libriary socket
 
 	"""
 	while True:
-		# Возвращаем признак блокирующей функции и сокет
+		# Return the sign of the blocking function and the socket
 		yield ("read", client_socket)
 		request = client_socket.recv(4096).decode()
 
-		# Добавления сообщения в Json файл с историей сообщений.
-		# Если сообщений больше 10 каждый элемент смещается на один
+		# Adds the message to a Json file with the message history.
+		# If there are more than 10 messages each item is shifted by one
 		with_json.write_messages_to_json(connection_users[client_socket], request)
 
 
-		# Рассылка по всем подключенным пользователям
+		# Mailing to all connected users
 		if request:
 			for sock in connection_users:
 				if sock is client_socket:
 					continue
 				else:
-					# Возвращаем признак блокирующей функции и сокет
+					# Return the sign of the blocking function and the socket
 					yield ("write", client_socket)
 					sock.send(f"{Fore.YELLOW}{connection_users[client_socket]}:\n  {Fore.GREEN}{request}{Fore.CYAN}You:\n  {Fore.GREEN}".encode())
 		else:
@@ -95,26 +94,26 @@ def client(client_socket):
 
 
 def event_loop():
-	""" Функция управляющая генераторами
+	""" Function controlling generators
 
-	Функция использует метод select
+	Using libriary select
 	"""
 	while any([tasks, to_read, to_write]):
 		
 		while not tasks:
-			# Возвращает списки с объектами имеющие файловый дескриптор,
-			# Доступные для чтения либо для записи
+			# Returns lists with objects that have a file descriptor,
+			# Available for reading or writing
 			ready_to_read, ready_to_write, _ = select(to_read, to_write, [])
 
-			# Проходим по списку доступных для чтения сокетов и добавляем объект фунции в список tasks
+			# Go through the list of readable sockets and add the function object to the tasks list
 			for i in ready_to_read:
 				tasks.append(to_read.pop(i))
 
-			# Проходим по списку доступных для записи сокетов и добавляем объект функции в список tasks
+			# Go through the list of writable sockets and add the function object to the list of tasks
 			for i in ready_to_write:
 				tasks.append(to_write.pop(i))
 		try:
-			# Берем первый елемент в списке удаляя его и продвигаем генератор
+			# Take the first item in the list, removing it and advancing the generator
 			task = tasks.pop(0)
 			reason, sock = next(task)
 

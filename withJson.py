@@ -3,23 +3,18 @@ from colorama import Fore
 
 
 class withJson():
-	""" Индивидуальный клас для работы с Json
+	""" Class for manage history chat
 
-	Используется библиотека Json
+	Using json libriary
 
 	"""
 
 	def __init__(self, file):
-		""" Инициализируем клас
-
-		"""
-		# Путь к файлу
+		# path to file
 		self.file = file 
 
+	# Load all data from file
 	def message_load(self):
-		""" Загружаем все данные из файла
-
-		"""
 		with open(self.file, "r") as file:
 			opened_file = file.read()
 			if opened_file == "":
@@ -28,19 +23,13 @@ class withJson():
 				data = json.loads(opened_file)
 			return data
 
+	# Write messages to file
 	def message_dump(self, messages):
-		""" Загружаем данные в файл
-
-		"""
 		with open(self.file, "w") as file:
 			json.dump(messages, file)
 
+	# Get processed history
 	def get_history_chat(self):
-		""" Получаем обработаную историю сообщений
-
-		Используется метод message_load
-
-		"""
 		text_message = ""
 		messages = self.message_load()
 		for i in messages:
@@ -49,12 +38,8 @@ class withJson():
 				text_message += f"{Fore.YELLOW}{i}:\n {Fore.CYAN}{one_message.get(i)}"
 		return text_message
 
+	# Write processed history
 	def write_messages_to_json(self, user, message):
-		""" Загружаем обработаную историю сообщений
-
-		Используются методы message_load и message_dump
-
-		"""
 		data_json = {}
 		messages = self.message_load()
 		if len(messages) == 10:
@@ -67,5 +52,3 @@ class withJson():
 		else:
 			messages[len(messages)+1] = {user: message}
 			self.message_dump(messages)
-
-
